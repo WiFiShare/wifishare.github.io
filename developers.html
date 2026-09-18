@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Developers — WiFiShare</title>
+<meta name="description" content="The WiFiShare API, the dump format with a worked path example, the licences, and how to run your own instance.">
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <p class="brand-block">
+      <a class="brand" href="index.html">WiFiShare</a>
+      <span class="brand-tag">Early development. Nothing is collected yet.</span>
+    </p>
+    <nav class="site-nav" aria-label="Main">
+      <ul role="list">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="how-it-works.html">How it works</a></li>
+        <li><a href="map.html">Map</a></li>
+        <li><a href="apps.html">Apps</a></li>
+        <li><a href="venues.html">Venues</a></li>
+        <li><a href="developers.html" aria-current="page">Developers</a></li>
+        <li><a href="privacy.html">Privacy</a></li>
+        <li><a href="optout.html">Opt out</a></li>
+        <li><a href="contribute.html">Contribute</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+
+    <h1>Developers</h1>
+
+    <p class="lede">Everything the project agrees on lives in the
+    <a href="https://github.com/WiFiShare/spec">spec</a> repository: the data
+    model, the JSON Schemas, the OpenAPI document, the privacy rules and the
+    test fixtures. If an implementation and that repository disagree, that
+    repository is right.</p>
+
+    <div class="banner banner--warn">
+      <p><strong class="banner-title">Nothing here is running</strong>
+      The API is not deployed. <code>api.wifishare.example</code> in the OpenAPI
+      document is a placeholder, chosen so that nobody accidentally points a
+      client at a real host: the production address is decided when hosting is.
+      The dump repository exists but is empty. The specification is version
+      <code>1</code>, marked draft, and nothing in it is frozen until the first
+      public beta.</p>
+    </div>
+
+    <h2>The repositories</h2>
+
+    <div class="table-scroll">
+      <table>
+        <caption>Where each part lives</caption>
+        <thead>
+          <tr>
+            <th scope="col">Repository</th>
+            <th scope="col">What it is</th>
+            <th scope="col">Licence</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row"><a href="https://github.com/WiFiShare/spec">spec</a></th>
+            <td>Data model, JSON Schemas, OpenAPI, privacy rules, fixtures</td>
+            <td>Apache-2.0</td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="https://github.com/WiFiShare/api">api</a></th>
+            <td>Django backend: anonymous ingest, area lookups, dump export</td>
+            <td>AGPL-3.0</td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="https://github.com/WiFiShare/android">android</a></th>
+            <td>Kotlin app that scans, shares and joins</td>
+            <td>MPL-2.0</td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="https://github.com/WiFiShare/ios">ios</a></th>
+            <td>Swift app that finds and joins</td>
+            <td>MPL-2.0</td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="https://github.com/WiFiShare/data">data</a></th>
+            <td>The weekly public dump</td>
+            <td>ODbL-1.0</td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="https://github.com/WiFiShare/wifishare.github.io">wifishare.github.io</a></th>
+            <td>This website</td>
+            <td>MIT for code, CC-BY-4.0 for text</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>The API, version 1</h2>
+
+    <p>Three properties are load-bearing, and any reimplementation has to keep
+    them:</p>
+
+    <ul>
+      <li>Contributing needs no account and carries no device identifier. A
+      batch is encrypted with HPKE to an ingest key before it is posted, so
+      proxies and logs never see it.</li>
+      <li>A lookup asks for a geohash-5 area, about 4.9 km across, so the server
+      is never told a caller's precise position.</li>
+      <li>There is no endpoint that resolves a hardware address to a position,
+      and community-found networks carry no hardware address at all.</li>
+    </ul>
+
+    <div class="table-scroll">
+      <table>
+        <caption>Endpoints, from <code>openapi.yaml</code></caption>
+        <thead>
+          <tr>
+            <th scope="col">Endpoint</th>
+            <th scope="col">Does</th>
+            <th scope="col">Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row"><code>GET /v1/keys</code></th>
+            <td>Current ingest public keys, newest first</td>
+            <td>Clients ship with a pinned key and refresh here. After a
+            rotation the previous key stays valid for 30 days.</td>
+          </tr>
+          <tr>
+            <th scope="row"><code>POST /v1/batches</code></th>
+            <td>Submit an encrypted batch of observations</td>
+            <td>Body is an envelope. Returns <code>202</code> with how many
+            observations were accepted and rejected, and which rule ids refused,
+            never which network. <code>409</code> means the key id is retired:
+            fetch <code>/v1/keys</code> and resend.</td>
+          </tr>
+          <tr>
+            <th scope="row"><code>GET /v1/areas/{geohash5}</code></th>
+            <td>Published networks in one area</td>
+            <td>Returns the same document as the file in the dump, as
+            <code>application/geo+json</code>. Cache with the ETag: most areas
+            change at most once a week. <code>404</code> means nothing is
+            published there yet.</td>
+          </tr>
+          <tr>
+            <th scope="row"><code>POST /v1/networks/{id}/reports</code></th>
+            <td>Say a network works, fails, is not free, is private or is gone</td>
+            <td>Anonymous and rate-limited. A free-text note is read by people,
+            and a client has to say so.</td>
+          </tr>
+          <tr>
+            <th scope="row"><code>POST /v1/optout</code></th>
+            <td>Remove a network and keep it out</td>
+            <td>A hardware address, or a network name plus an area. Accepted
+            whether or not the network was known. No proof demanded.</td>
+          </tr>
+          <tr>
+            <th scope="row"><code>POST /v1/claims</code></th>
+            <td>Start a venue claim</td>
+            <td>Returns a challenge code like <code>ws-4f2a9c</code> to append
+            to the network name.</td>
+          </tr>
+          <tr>
+            <th scope="row"><code>POST /v1/claims/{claim_id}/verify</code></th>
+            <td>Confirm the code is visible on air</td>
+            <td>Takes the observed name and the hardware address.
+            <code>409</code> if the code was not seen on that network.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Errors are RFC 9457 problem details, and carry the filter or publish rule
+    that refused when there is one. Rate limiting returns <code>429</code> with
+    <code>Retry-After</code>.</p>
+
+    <h3>The ingest envelope</h3>
+
+    <p>HPKE (<a href="https://www.rfc-editor.org/rfc/rfc9180.html">RFC 9180</a>)
+    base mode, suite <code>x25519-sha256-chacha20poly1305</code>, with
+    <code>info</code> set to the batch schema id and the key id passed as
+    additional authenticated data:</p>
+
+<pre><code>{
+  "schema": "wifishare.envelope/1",
+  "key_id": "2026q4",
+  "suite": "x25519-sha256-chacha20poly1305",
+  "enc": "&lt;base64url, 32 bytes&gt;",
+  "ct": "&lt;base64url&gt;"
+}</code></pre>
+
+    <p>Inside it is a batch: the schema id, a client object carrying only the
+    platform and a major.minor version, and up to 200 observations. No batch id,
+    no sequence number and no timestamp, so two batches from one device cannot
+    be linked.</p>
+
+    <h2>The dump</h2>
+
+    <p>One file per geohash-5 cell, nested under the geohash-2 and geohash-3
+    prefixes of the same geohash. The three segments are prefixes of one value,
+    not three separate ones.</p>
+
+<pre><code>areas/&lt;gh2&gt;/&lt;gh3&gt;/&lt;gh5&gt;.geojson</code></pre>
+
+    <h3>Worked example</h3>
+
+    <p>Piazza Maggiore in Bologna is at 44.4938, 11.3426. Encode that as a
+    geohash of at least 5 characters and take the prefixes:</p>
+
+    <div class="table-scroll">
+      <table>
+        <caption>From a coordinate to a file path</caption>
+        <thead>
+          <tr><th scope="col">Step</th><th scope="col">Value</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Coordinate</th><td><code>44.4938, 11.3426</code></td></tr>
+          <tr><th scope="row">geohash-7</th><td><code>srbj45g</code> — the published cell of a community network there, about 153 m by 109 m</td></tr>
+          <tr><th scope="row">geohash-5</th><td><code>srbj4</code> — the area, about 4.9 km</td></tr>
+          <tr><th scope="row">geohash-3</th><td><code>srb</code> — second directory</td></tr>
+          <tr><th scope="row">geohash-2</th><td><code>sr</code> — first directory</td></tr>
+          <tr><th scope="row">Path</th><td><code>areas/sr/srb/srbj4.geojson</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>A missing file is not an error: it means nothing is published for that
+    area. Check the eight neighbouring cells as well when you are near a
+    boundary, because a network just across it lives in the neighbour's file.
+    <code>index.json</code> lists the areas that exist, so you can fetch that
+    first instead of probing.</p>
+
+    <p>Each directory therefore holds at most 32 subdirectories or 1,024 files,
+    which stays under GitHub's limit of 3,000 entries per directory.</p>
+
+    <h3>What is in a file</h3>
+
+    <p>A GeoJSON <code>FeatureCollection</code> with foreign members naming the
+    cell and the licence, and one <code>Feature</code> per network with a
+    <code>Point</code> geometry. Longitude first, as GeoJSON requires. The
+    normative shape is
+    <a href="https://github.com/WiFiShare/spec/blob/main/schemas/area.schema.json"><code>area.schema.json</code></a>,
+    which references
+    <a href="https://github.com/WiFiShare/spec/blob/main/schemas/network.schema.json"><code>network.schema.json</code></a>
+    for the properties.</p>
+
+    <div class="table-scroll">
+      <table>
+        <caption>Properties of one network. <abbr title="verified only">V</abbr> marks a field that only owner-verified networks carry.</caption>
+        <thead>
+          <tr>
+            <th scope="col">Field</th>
+            <th scope="col">Type</th>
+            <th scope="col"><abbr title="verified only">V</abbr></th>
+            <th scope="col">Meaning</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row"><code>id</code></th><td>12 characters, base32</td><td></td><td>Random, with no derivation from hardware address, name or position. Not reused.</td></tr>
+          <tr><th scope="row"><code>ssid</code></th><td>string, 1–32</td><td></td><td>The network name as broadcast.</td></tr>
+          <tr><th scope="row"><code>security</code></th><td><code>open</code>, <code>owe</code>, <code>shared</code></td><td></td><td><code>shared</code> means a password the owner published.</td></tr>
+          <tr><th scope="row"><code>captive_portal</code></th><td><code>unknown</code>, <code>detected</code>, <code>none</code></td><td></td><td><code>detected</code> only when a device actually met a portal.</td></tr>
+          <tr><th scope="row"><code>verification</code></th><td><code>community</code>, <code>owner-verified</code></td><td></td><td>Decides everything about precision.</td></tr>
+          <tr><th scope="row"><code>lat</code>, <code>lon</code></th><td>number</td><td></td><td>Centre of the geohash-7 cell, or exact for a verified network.</td></tr>
+          <tr><th scope="row"><code>precision_m</code></th><td><code>150</code> or <code>10</code></td><td></td><td>Read this before treating the coordinates as a position.</td></tr>
+          <tr><th scope="row"><code>cell</code></th><td>7 characters</td><td></td><td>The geohash-7 cell the position stands for.</td></tr>
+          <tr><th scope="row"><code>first_seen</code>, <code>last_seen</code></th><td><code>YYYY-MM-DD</code></td><td></td><td>Day precision only.</td></tr>
+          <tr><th scope="row"><code>reports</code></th><td>object</td><td></td><td><code>{ "works": n, "fails": n }</code>.</td></tr>
+          <tr><th scope="row"><code>bssids</code></th><td>array of string</td><td>V</td><td>Lowercase, colon-separated. Never present on a community network.</td></tr>
+          <tr><th scope="row"><code>venue</code></th><td>object</td><td>V</td><td><code>{ "name": "...", "kind": "cafe" }</code>.</td></tr>
+          <tr><th scope="row"><code>credential</code></th><td>object</td><td>V</td><td>Only when the owner chose to publish it.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p><code>SCHEMA.md</code> in the data repository is a readable summary of
+    the same fields for people consuming the dump. Where the two ever disagree,
+    the schemas in <code>spec</code> are what an implementation must follow.</p>
+
+    <h3>Reading it safely</h3>
+
+    <ul>
+      <li>Do not treat a community coordinate as a location. It is a cell
+      centre. Use <code>precision_m</code> and <code>cell</code> when precision
+      matters.</li>
+      <li>Do not assume <code>bssids</code> is present. Code that requires it
+      will fail on almost every feature.</li>
+      <li>Do not join this data against another database in a way that would
+      restore the precision the filter removed, or re-identify a person. The
+      three privacy rules apply to what you build on the dump, and the ODbL's
+      share-alike terms apply to the result.</li>
+      <li>Do not pin to a commit in the data repository. History is squashed
+      monthly so that removals are real. Use a monthly release if you need a
+      fixed version.</li>
+    </ul>
+
+    <h3>A sample file you can read right now</h3>
+
+    <p>This site ships one invented area file so the map has something to draw.
+    It validates against <code>area.schema.json</code> and uses the real dump
+    layout:</p>
+
+    <p><a href="sample/areas/sr/srb/srbj4.geojson"><code>sample/areas/sr/srb/srbj4.geojson</code></a>
+    — five networks, all fictional, every name starting with
+    <code>SAMPLE</code>.</p>
+
+    <h2>Licences</h2>
+
+    <div class="table-scroll">
+      <table>
+        <caption>What you may do with each part</caption>
+        <thead>
+          <tr><th scope="col">Part</th><th scope="col">Licence</th><th scope="col">In short</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Backend</th>
+            <td>AGPL-3.0</td>
+            <td>Run a modified version as a network service and you have to
+            offer its source to its users.</td>
+          </tr>
+          <tr>
+            <th scope="row">Apps</th>
+            <td>MPL-2.0</td>
+            <td>File-level copyleft. Changed files stay open; the rest of your
+            application does not have to be.</td>
+          </tr>
+          <tr>
+            <th scope="row">Specification</th>
+            <td>Apache-2.0</td>
+            <td>Reimplement it freely, including commercially.</td>
+          </tr>
+          <tr>
+            <th scope="row">This website</th>
+            <td>MIT for code, CC-BY-4.0 for text</td>
+            <td>Take the code; quote the text with credit.</td>
+          </tr>
+          <tr>
+            <th scope="row">Published data</th>
+            <td>ODbL-1.0</td>
+            <td>Share, adapt and use it, including commercially, as long as you
+            attribute it, keep an adapted database under the same licence, and
+            do not use technical measures to restrict others' use of it.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>The attribution line for the data:</p>
+
+<pre><code>Contains data from WiFiShare, available under the Open Database License (ODbL) 1.0.</code></pre>
+
+    <p>The individual contents of the database, taken on their own, are not
+    claimed under ODbL. The licence text governs; this summary does not.</p>
+
+    <p>There is no contributor licence agreement and no sign-off requirement.
+    Contributions are licensed under the licence of the repository they land
+    in.</p>
+
+    <h2>Running your own</h2>
+
+    <p>You can run everything yourself. That is not a courtesy: the backend is
+    AGPL-3.0 precisely so that a modified instance stays open to the people
+    using it.</p>
+
+    <h3>What is possible today</h3>
+
+    <ol class="steps">
+      <li><b>Serve the dump layout.</b>
+        An area file is a static file. Put
+        <code>areas/&lt;gh2&gt;/&lt;gh3&gt;/&lt;gh5&gt;.geojson</code> and an
+        <code>index.json</code> behind any web server, send
+        <code>Access-Control-Allow-Origin</code> if a browser is going to read
+        it, and you have a working read-only instance. The
+        <code>sample/</code> directory here is exactly that, in miniature.</li>
+      <li><b>Point a client at it.</b>
+        Set <code>DATA_BASE_URL</code> in <code>config.js</code> and this
+        site's map reads your files instead of the sample.</li>
+      <li><b>Validate what you produce.</b>
+        Check every file against <code>area.schema.json</code> from
+        <code>spec</code> before you serve it. The schema catches the mistakes
+        that matter, including a community network carrying a hardware address
+        or the wrong precision.</li>
+      <li><b>Run the privacy fixtures.</b>
+        <code>privacy/fixtures/filter-cases.json</code> in <code>spec</code> is
+        the acceptance test for the on-device filter. Evaluate the age rule
+        against the fixture's <code>now</code> field, not the wall clock, and
+        apply the drop rules in numeric order, reporting the first that matches.
+        A client that keeps a network the fixtures drop is a privacy bug and
+        must not ship.</li>
+    </ol>
+
+    <h3>What is not possible yet</h3>
+
+    <p>The <a href="https://github.com/WiFiShare/api">api</a> repository is a
+    Django backend that has not been written: there are no build or deployment
+    instructions in it to link to, because there is nothing to build. Ingest,
+    aggregation, the claim flow and the export job are phase P1 work. If you
+    want to run a full instance, that is the part to help with rather than the
+    part to follow instructions for.</p>
+
+    <h3>Previewing this site</h3>
+
+<pre><code>git clone https://github.com/WiFiShare/wifishare.github.io.git
+cd wifishare.github.io
+python3 -m http.server 8000</code></pre>
+
+    <p>Then open <code>http://localhost:8000/</code>. There is no build step and
+    no dependency to install: the repository is served exactly as it is. Opening
+    the files directly with <code>file://</code> will not work for the map,
+    because a browser refuses module scripts and fetches from that scheme.</p>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <div>
+        <h2>Project</h2>
+        <ul role="list">
+          <li><a href="https://github.com/WiFiShare">GitHub organisation</a></li>
+          <li><a href="https://github.com/WiFiShare/spec">spec</a></li>
+          <li><a href="https://github.com/WiFiShare/data">data</a></li>
+          <li><a href="contribute.html">Contribute</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>This site</h2>
+        <ul role="list">
+          <li><a href="privacy.html">Privacy policy (draft)</a></li>
+          <li><a href="optout.html">Opt a network out</a></li>
+          <li><a href="https://github.com/WiFiShare/wifishare.github.io">Source of this site</a></li>
+        </ul>
+      </div>
+    </div>
+    <p>Site code is MIT. Site text is
+      <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+      The published data is
+      <a href="https://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a>.</p>
+    <p class="status-line">No cookies, no analytics, no third-party embeds.
+      WiFiShare is in early development: no data is collected, no app is
+      released and the API is not live.</p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "schema": "wifishare.index/1",
+  "generated": "2026-09-18",
+  "network_count": 5,
+  "area_count": 1,
+  "areas": {
+    "srbj4": {
+      "network_count": 5,
+      "updated": "2026-09-18"
+    }
+  }
+}

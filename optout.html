@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Keep a network out — WiFiShare</title>
+<meta name="description" content="How to keep a Wi-Fi network out of WiFiShare: rename it to end in _nomap or _optout. The web form is not live yet.">
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <p class="brand-block">
+      <a class="brand" href="index.html">WiFiShare</a>
+      <span class="brand-tag">Early development. Nothing is collected yet.</span>
+    </p>
+    <nav class="site-nav" aria-label="Main">
+      <ul role="list">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="how-it-works.html">How it works</a></li>
+        <li><a href="map.html">Map</a></li>
+        <li><a href="apps.html">Apps</a></li>
+        <li><a href="venues.html">Venues</a></li>
+        <li><a href="developers.html">Developers</a></li>
+        <li><a href="privacy.html">Privacy</a></li>
+        <li><a href="optout.html" aria-current="page">Opt out</a></li>
+        <li><a href="contribute.html">Contribute</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+
+    <h1>Keep a network out</h1>
+
+    <p class="lede">You do not need an account, an email address or a reason. If
+    a Wi-Fi network is yours and you do not want it collected, rename it so its
+    name ends in <code>_nomap</code>.</p>
+
+    <div class="banner banner--note">
+      <p><strong class="banner-title">Nothing is collected yet</strong>
+      No app has been released and the published dump is empty, so there is
+      currently nothing to remove. Renaming a network now still works: it means
+      the network is never collected in the first place, which is the stronger
+      outcome.</p>
+    </div>
+
+    <h2>The reliable way: rename the network</h2>
+
+    <p>Open your router's settings page, change the network name so it ends in
+    <code>_nomap</code>, and save. For example:</p>
+
+    <pre><code>Casa Rossi        becomes   Casa Rossi_nomap
+The Bear Cafe     becomes   The Bear Cafe_nomap</code></pre>
+
+    <p>WiFiShare also honours <code>_optout</code>, so a name ending in either
+    suffix is dropped. The comparison ignores case, and only the ending counts:
+    a network called <code>Bar Nomap</code> is <strong>not</strong> opted out,
+    because the name does not end in the suffix.</p>
+
+    <p>Everyone in your household will see the new name and will have to rejoin
+    the network once. That is the whole cost.</p>
+
+    <h3>It is not only WiFiShare that honours it</h3>
+
+    <p><code>_nomap</code> is not a WiFiShare invention. Google introduced it,
+    <a href="https://support.google.com/maps/answer/1725632">documents it</a>,
+    and asks other location-service providers to respect it: "We encourage other
+    providers to respect the <code>_nomap</code> tag as a way to opt out from
+    inclusion in a Location server." Apple honours the same suffix and
+    <a href="https://support.apple.com/en-us/102515">documents it</a>: "The owner
+    of a Wi-Fi access point can opt it out of Apple's Location Services by
+    changing the access point's SSID (name) to end with <code>_nomap</code>."
+    <code>_optout</code> came from Microsoft's service. WiFiShare accepts both.</p>
+
+    <p>Apple notes one limit that applies here too: the opt-out cannot work for
+    a hidden network, because a hidden network does not broadcast its name for
+    anyone to read. WiFiShare never collects hidden networks at all, by rule R1,
+    so they need no opt-out.</p>
+
+    <p>Each provider runs its own database and decides its own rules, so
+    renaming opts you out of the providers that honour the convention, not of
+    every database in the world. If a specific provider matters to you, check
+    what that provider's own documentation says today.</p>
+
+    <h3>What the rename does here</h3>
+
+    <p>The check happens on the phone, in the app, before anything is stored or
+    sent. A network with one of those endings is dropped by rule R2 and never
+    reaches the network at all. The server applies the same rule again on
+    arrival, so an old app that got it wrong cannot sneak one through.</p>
+
+    <h2>Removing a network that is already listed</h2>
+
+    <p>Two more routes are planned. Neither exists yet.</p>
+
+    <ol class="steps">
+      <li><b>One tap in the app.</b>
+        Planned for both apps. While you are connected to a network, the app
+        reads its hardware address and asks the server to remove it. No account,
+        no proof. Removal is low risk, and an owner who later wants the network
+        listed can <a href="venues.html">claim it</a>.</li>
+      <li><b>The web form below.</b>
+        For when you are not on the network, or do not want to install
+        anything. It identifies a network by its name plus the rough area it is
+        in, because that is enough to find it and does not require you to look
+        up anything technical.</li>
+    </ol>
+
+    <p>Whichever route is used, the network is unpublished straight away and
+    leaves the weekly dump at the next export. Its hardware address is then kept
+    only as a keyed hash, so the network can be kept out without it being held
+    on file.</p>
+
+    <h2>The web form</h2>
+
+    <div class="banner banner--warn">
+      <p><strong class="banner-title">This form does nothing. The API is not live.</strong>
+      It is shown so that the shape of the request can be reviewed and argued
+      with before it is built. Every field is disabled and the page submits
+      nowhere. Until the API exists, rename the network instead: it is the
+      stronger option anyway.</p>
+    </div>
+
+    <form class="form-disabled" aria-describedby="form-note">
+      <fieldset disabled>
+        <legend>Remove a network from WiFiShare</legend>
+
+        <p id="form-note" class="status-line">Disabled: there is no server to
+        send this to.</p>
+
+        <div class="field">
+          <label for="ssid">Network name</label>
+          <span class="hint" id="ssid-hint">The name the network broadcasts,
+          exactly as it appears in the list of networks.</span>
+          <input type="text" id="ssid" name="ssid" maxlength="32"
+                 autocomplete="off" aria-describedby="ssid-hint">
+        </div>
+
+        <div class="field">
+          <label for="cell">Area</label>
+          <span class="hint" id="cell-hint">A five-character geohash cell, about
+          4.9 km across, for example <code>srbj4</code>. The
+          <a href="map.html">map</a> shows which cell you are looking at. Rough
+          is the point: we do not want your address.</span>
+          <input type="text" id="cell" name="cell" maxlength="5" size="8"
+                 autocomplete="off" aria-describedby="cell-hint">
+        </div>
+
+        <div class="field">
+          <label for="reason">Reason (optional)</label>
+          <span class="hint" id="reason-hint">Never required. Leaving it blank
+          changes nothing about what happens.</span>
+          <select id="reason" name="reason" aria-describedby="reason-hint">
+            <option value="">No reason given</option>
+            <option value="mine">It is mine</option>
+            <option value="private">It is a private network</option>
+            <option value="wrong">The listing is wrong</option>
+            <option value="other">Something else</option>
+          </select>
+        </div>
+
+        <p><button type="submit">Remove this network</button></p>
+      </fieldset>
+    </form>
+
+    <h3>What the form does not ask for</h3>
+
+    <ul>
+      <li><strong>No password.</strong> Not the network's, not yours. Nothing
+      here or anywhere else on this site will ever ask for a Wi-Fi password in
+      order to remove a network. If a page does ask, it is not this project.</li>
+      <li><strong>No account, no email address, no name.</strong> There is
+      nothing to send you and nobody to check you against.</li>
+      <li><strong>No proof of ownership.</strong> Removal is low risk: the worst
+      outcome is a network missing from a public map, and its owner can put it
+      back by claiming it.</li>
+      <li><strong>No exact address.</strong> An area, not a location.</li>
+      <li><strong>No hardware address.</strong> The app route uses one, because
+      the phone can read it while connected. A person filling in a web form
+      should not have to go and find it.</li>
+    </ul>
+
+    <h2>A network in the data that should not be there</h2>
+
+    <p>If a listed network is not yours but should not be listed — someone's
+    home, a network that no longer exists, a wrong position — open a
+    <code>Network problem</code> issue on the
+    <a href="https://github.com/WiFiShare/data">data</a> repository. Issues are
+    public: do not include a hardware address or a password in one.</p>
+
+    <p>Three reports saying a network is private or gone take it out
+    automatically, so reporting through an app will also work once there is
+    one.</p>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <div>
+        <h2>Project</h2>
+        <ul role="list">
+          <li><a href="https://github.com/WiFiShare">GitHub organisation</a></li>
+          <li><a href="https://github.com/WiFiShare/spec">spec</a></li>
+          <li><a href="https://github.com/WiFiShare/data">data</a></li>
+          <li><a href="contribute.html">Contribute</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>This site</h2>
+        <ul role="list">
+          <li><a href="privacy.html">Privacy policy (draft)</a></li>
+          <li><a href="optout.html">Opt a network out</a></li>
+          <li><a href="https://github.com/WiFiShare/wifishare.github.io">Source of this site</a></li>
+        </ul>
+      </div>
+    </div>
+    <p>Site code is MIT. Site text is
+      <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+      The published data is
+      <a href="https://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a>.</p>
+    <p class="status-line">No cookies, no analytics, no third-party embeds.
+      WiFiShare is in early development: no data is collected, no app is
+      released and the API is not live.</p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Map — WiFiShare</title>
+<meta name="description" content="A map of published WiFiShare networks. No real data has been published yet, so the map draws a sample file from this repository.">
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="assets/css/site.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/5.6.0/maplibre-gl.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <p class="brand-block">
+      <a class="brand" href="index.html">WiFiShare</a>
+      <span class="brand-tag">Early development. Nothing is collected yet.</span>
+    </p>
+    <nav class="site-nav" aria-label="Main">
+      <ul role="list">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="how-it-works.html">How it works</a></li>
+        <li><a href="map.html" aria-current="page">Map</a></li>
+        <li><a href="apps.html">Apps</a></li>
+        <li><a href="venues.html">Venues</a></li>
+        <li><a href="developers.html">Developers</a></li>
+        <li><a href="privacy.html">Privacy</a></li>
+        <li><a href="optout.html">Opt out</a></li>
+        <li><a href="contribute.html">Contribute</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap map-wrap">
+
+    <h1>Map</h1>
+
+    <div class="banner banner--warn" id="sample-banner">
+      <p><strong class="banner-title">This is sample data. None of these networks exist.</strong>
+      WiFiShare has published nothing yet: the
+      <a href="https://github.com/WiFiShare/data">dump</a> is empty and the API
+      is not live. So that the map can be built and reviewed, it is drawing five
+      invented networks in one area over the centre of Bologna. Every name
+      starts with <code>SAMPLE</code>. To point the map at real data, set
+      <code>DATA_BASE_URL</code> in
+      <a href="https://github.com/WiFiShare/wifishare.github.io/blob/main/config.js">config.js</a>.</p>
+    </div>
+
+    <noscript>
+      <div class="banner banner--note">
+        <p><strong class="banner-title">The map needs JavaScript</strong>
+        Drawing a map means running code, so this page is the one part of the
+        site that does not work without it. Everything else does.</p>
+        <p>The data itself is plain files and needs nothing. You can read the
+        sample area file directly:
+        <a href="sample/areas/sr/srb/srbj4.geojson">sample/areas/sr/srb/srbj4.geojson</a>,
+        and the layout is explained on the
+        <a href="developers.html">developers page</a>. Real area files will live
+        in the <a href="https://github.com/WiFiShare/data">data</a> repository in
+        the same shape.</p>
+      </div>
+    </noscript>
+
+    <div id="map" role="region" aria-label="Map of published networks. The same networks are listed as text below the map."></div>
+
+    <p class="map-status" id="map-status" role="status">Loading the map…</p>
+
+    <p class="attrib" id="map-attrib">Background map:
+      <a href="https://openfreemap.org/">OpenFreeMap</a> ·
+      <a href="https://www.openmaptiles.org/">© OpenMapTiles</a> ·
+      Data from <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>.
+      Network data: WiFiShare contributors, <a href="https://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a>.
+      Reading from <code id="data-source">sample/</code>.</p>
+
+    <h2>How to read it</h2>
+
+    <div class="table-scroll">
+      <table>
+        <caption>What the two kinds of network look like</caption>
+        <thead>
+          <tr>
+            <th scope="col">Kind</th>
+            <th scope="col">On the map</th>
+            <th scope="col">What the position means</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Community-found</th>
+            <td>A small dot inside a dashed square</td>
+            <td>The square is the geohash-7 cell, about 150 m across. The
+            network is somewhere in it. The dot is the centre of the square and
+            is not a measurement.</td>
+          </tr>
+          <tr>
+            <th scope="row">Owner-verified</th>
+            <td>A larger dot with no square</td>
+            <td>The venue asked to be found, so the position is exact, published
+            with a stated precision of 10 m, and the hardware addresses are
+            published too.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Every network is also listed below in words, with the same detail, so the
+    map is not the only way to read the page. Kind is written out there rather
+    than shown by colour.</p>
+
+    <h2 id="network-list-heading">Networks loaded</h2>
+
+    <ul class="network-list" id="network-list" role="list"></ul>
+
+    <h2>Where the data comes from</h2>
+
+    <p>The map reads the dump layout directly. It asks for
+    <code>index.json</code> first, to learn which areas exist, and then for one
+    file per visible area:</p>
+
+    <pre><code>&lt;DATA_BASE_URL&gt;/index.json
+&lt;DATA_BASE_URL&gt;/areas/&lt;gh2&gt;/&lt;gh3&gt;/&lt;gh5&gt;.geojson</code></pre>
+
+    <p>With no <code>DATA_BASE_URL</code> configured it falls back to
+    <code>sample/</code> in this repository and says so in the banner above. An
+    area with no file is not an error: it means nothing is published there, and
+    the map says so rather than showing an empty map with no explanation.</p>
+
+    <p>When the map is zoomed out past the point where the number of area files
+    is reasonable, it stops asking for them and says to zoom in. An area file
+    covers about 4.9 km.</p>
+
+    <h2>What the map deliberately does not do</h2>
+
+    <ul>
+      <li>It does not ask for your location. Nothing on this site does.</li>
+      <li>It does not send your position anywhere. Area files are fetched by
+      cell name, and a cell is about 4.9 km across.</li>
+      <li>It sets no cookies and loads no analytics. The map library comes from
+      a public CDN and the background tiles from the provider named above; those
+      are the only third-party requests on this site, and they happen only on
+      this page.</li>
+    </ul>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <div>
+        <h2>Project</h2>
+        <ul role="list">
+          <li><a href="https://github.com/WiFiShare">GitHub organisation</a></li>
+          <li><a href="https://github.com/WiFiShare/spec">spec</a></li>
+          <li><a href="https://github.com/WiFiShare/data">data</a></li>
+          <li><a href="contribute.html">Contribute</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>This site</h2>
+        <ul role="list">
+          <li><a href="privacy.html">Privacy policy (draft)</a></li>
+          <li><a href="optout.html">Opt a network out</a></li>
+          <li><a href="https://github.com/WiFiShare/wifishare.github.io">Source of this site</a></li>
+        </ul>
+      </div>
+    </div>
+    <p>Site code is MIT. Site text is
+      <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+      The published data is
+      <a href="https://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a>.</p>
+    <p class="status-line">No cookies, no analytics, no third-party embeds.
+      WiFiShare is in early development: no data is collected, no app is
+      released and the API is not live.</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/5.6.0/maplibre-gl.js"></script>
+<script src="config.js"></script>
+<script type="module" src="assets/js/map.js"></script>
+
+</body>
+</html>

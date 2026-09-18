@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WiFiShare — an open platform for sharing Wi-Fi access</title>
+<meta name="description" content="WiFiShare is an open platform for sharing free and open Wi-Fi. It is in early development: no data is collected yet and no app is released.">
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <p class="brand-block">
+      <a class="brand" href="index.html">WiFiShare</a>
+      <span class="brand-tag">Early development. Nothing is collected yet.</span>
+    </p>
+    <nav class="site-nav" aria-label="Main">
+      <ul role="list">
+        <li><a href="index.html" aria-current="page">Home</a></li>
+        <li><a href="how-it-works.html">How it works</a></li>
+        <li><a href="map.html">Map</a></li>
+        <li><a href="apps.html">Apps</a></li>
+        <li><a href="venues.html">Venues</a></li>
+        <li><a href="developers.html">Developers</a></li>
+        <li><a href="privacy.html">Privacy</a></li>
+        <li><a href="optout.html">Opt out</a></li>
+        <li><a href="contribute.html">Contribute</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+
+    <h1>An open platform for sharing Wi-Fi access</h1>
+
+    <p class="lede">People and venues share free or open Wi-Fi, so that other
+    people can find it and join it. The data is public and openly licensed. The
+    code is open source.</p>
+
+    <div class="banner banner--note">
+      <p><strong class="banner-title">Status: early development</strong>
+      WiFiShare started in September 2026. <strong>No data has been collected
+      and none has been published.</strong> No app has been released. The API is
+      not live, and the address in the API specification is a placeholder. What
+      exists today is the specification, the empty data repository and this
+      site.</p>
+    </div>
+
+    <h2>The three privacy rules</h2>
+
+    <p>These come before features. Every rule in the specification exists to
+    serve one of them.</p>
+
+    <ol class="steps">
+      <li><b>Collect only what helps someone connect.</b>
+        A network name, whether it is open, whether there is a captive portal,
+        and roughly where it is. Nothing about the person who saw it.</li>
+      <li><b>Publish less than is collected.</b>
+        A network that someone's app saw while walking past is published as a
+        name inside a cell about 150&nbsp;m across, without its hardware address.</li>
+      <li><b>Keep nothing that ties an observation to a person.</b>
+        No accounts, no device identifiers, no advertising identifiers. Raw
+        observations are deleted within 7 days of the aggregation that used
+        them.</li>
+    </ol>
+
+    <h2>How it will work</h2>
+
+    <ol class="steps">
+      <li><b>The app filters on the phone.</b>
+        Networks that must not be collected are dropped before anything is
+        stored or sent: hidden networks, names ending in <code>_nomap</code> or
+        <code>_optout</code>, phone hotspots, and anything that is not open.</li>
+      <li><b>What survives is encrypted and sent in a batch.</b>
+        The batch is encrypted to the server's key before it leaves the phone,
+        and carries no identifier, no sequence number and no timestamp of its
+        own.</li>
+      <li><b>The server aggregates and applies thresholds.</b>
+        A network is published only after at least 3 observations, from at
+        least 3 different sources, on at least 2 different days.</li>
+      <li><b>The result is published as open data.</b>
+        Area files on the API and a weekly dump on GitHub, under the Open
+        Database License.</li>
+      <li><b>Venues can claim their own network.</b>
+        A venue that wants to be found exactly proves it controls the network
+        and chooses what to share.</li>
+    </ol>
+
+    <p><a href="how-it-works.html">Read the longer explanation, including what
+    is never collected and why</a>.</p>
+
+    <h2>What it is not</h2>
+
+    <ul>
+      <li>It is not a positioning database. There is no way to ask where a
+      given access point is: community-found hardware addresses are never
+      published, and the API has no lookup by hardware address.</li>
+      <li>It is not a way to get into networks that are not being shared.
+      Password-protected networks are collected only when their owner shares
+      them deliberately.</li>
+      <li>It is not a product with users, partners or a launch date. It is a
+      specification and some empty repositories.</li>
+    </ul>
+
+    <h2>Where the project is</h2>
+
+    <div class="table-scroll">
+      <table>
+        <caption>Phases, from the project's organisation profile</caption>
+        <thead>
+          <tr><th scope="col">Phase</th><th scope="col">Work</th><th scope="col">State</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">P0</th><td>Foundations: specification, schemas, privacy rules</td><td>Current</td></tr>
+          <tr><th scope="row">P1</th><td>Data pipeline and API</td><td>Planned</td></tr>
+          <tr><th scope="row">P2</th><td>Android app</td><td>Planned</td></tr>
+          <tr><th scope="row">P3</th><td>iOS app</td><td>Planned</td></tr>
+          <tr><th scope="row">P4</th><td>Venue sharing and public beta</td><td>Targeted around April 2027</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Go on from here</h2>
+
+    <ul class="cards" role="list">
+      <li><a class="card" href="how-it-works.html"><b>How it works</b><span>The pipeline from a phone to the published dump, and what never enters it.</span></a></li>
+      <li><a class="card" href="map.html"><b>Map</b><span>What published data will look like. Today it draws a sample file, not real networks.</span></a></li>
+      <li><a class="card" href="apps.html"><b>Apps</b><span>What the Android and iOS apps will do, and what iOS cannot do.</span></a></li>
+      <li><a class="card" href="venues.html"><b>For venues</b><span>Cafés, libraries and councils who want their Wi-Fi found.</span></a></li>
+      <li><a class="card" href="developers.html"><b>Developers</b><span>The API, the dump format, the licences and how to run your own instance.</span></a></li>
+      <li><a class="card" href="optout.html"><b>Keep a network out</b><span>Rename it to end in <code>_nomap</code>. It works here, and for Google and Apple.</span></a></li>
+    </ul>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <div>
+        <h2>Project</h2>
+        <ul role="list">
+          <li><a href="https://github.com/WiFiShare">GitHub organisation</a></li>
+          <li><a href="https://github.com/WiFiShare/spec">spec</a></li>
+          <li><a href="https://github.com/WiFiShare/data">data</a></li>
+          <li><a href="contribute.html">Contribute</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>This site</h2>
+        <ul role="list">
+          <li><a href="privacy.html">Privacy policy (draft)</a></li>
+          <li><a href="optout.html">Opt a network out</a></li>
+          <li><a href="https://github.com/WiFiShare/wifishare.github.io">Source of this site</a></li>
+        </ul>
+      </div>
+    </div>
+    <p>Site code is MIT. Site text is
+      <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+      The published data is
+      <a href="https://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a>.</p>
+    <p class="status-line">No cookies, no analytics, no third-party embeds.
+      WiFiShare is in early development: no data is collected, no app is
+      released and the API is not live.</p>
+  </div>
+</footer>
+
+</body>
+</html>

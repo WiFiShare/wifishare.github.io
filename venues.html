@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>For venues — WiFiShare</title>
+<meta name="description" content="How a café, library or council will be able to share its Wi-Fi through WiFiShare, what verification involves, and exactly what becomes public.">
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <p class="brand-block">
+      <a class="brand" href="index.html">WiFiShare</a>
+      <span class="brand-tag">Early development. Nothing is collected yet.</span>
+    </p>
+    <nav class="site-nav" aria-label="Main">
+      <ul role="list">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="how-it-works.html">How it works</a></li>
+        <li><a href="map.html">Map</a></li>
+        <li><a href="apps.html">Apps</a></li>
+        <li><a href="venues.html" aria-current="page">Venues</a></li>
+        <li><a href="developers.html">Developers</a></li>
+        <li><a href="privacy.html">Privacy</a></li>
+        <li><a href="optout.html">Opt out</a></li>
+        <li><a href="contribute.html">Contribute</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+
+    <h1>For venues</h1>
+
+    <p class="lede">A café, a library, a museum, a council square. If you offer
+    Wi-Fi and want people to find it, you will be able to claim the network,
+    prove you control it, and decide what is published about it.</p>
+
+    <div class="banner banner--note">
+      <p><strong class="banner-title">You cannot do this yet</strong>
+      Venue sharing is phase P4, targeted around April 2027. The API is not
+      live, there is no form, and nobody at this project will contact you asking
+      you to sign up. This page describes what is planned, so that you can
+      object to it while it is still cheap to change.</p>
+    </div>
+
+    <h2>What you get out of it</h2>
+
+    <ul>
+      <li>Your network is shown at its actual position, not somewhere on the
+      block.</li>
+      <li>Your venue's name is shown, so people know whose Wi-Fi it is.</li>
+      <li>You can publish the password, if there is one, so that joining is one
+      tap instead of asking at the counter.</li>
+      <li>You can take it all back down. A network its owner withdraws is
+      unpublished.</li>
+    </ul>
+
+    <h2>Read this before you decide</h2>
+
+    <div class="banner banner--warn">
+      <p><strong class="banner-title">Verifying makes your venue's exact position and hardware addresses open data.</strong></p>
+      <p>An unclaimed network is published deliberately vaguely: a name inside a
+      cell about 150 m across, with no hardware address. Claiming a network
+      removes that blurring on purpose, because being found exactly is the point
+      of claiming.</p>
+      <p>What becomes public, under an open licence that allows anyone to copy,
+      redistribute and build on it commercially:</p>
+      <ul>
+        <li>The exact position of your access points, written to 5 decimal places
+        and published with a stated precision of 10 m.</li>
+        <li>The hardware address (BSSID) of every access point you list.</li>
+        <li>Your venue's name and kind.</li>
+        <li>The password, if and only if you mark it public.</li>
+      </ul>
+      <p>Once it is in a published file, other people have copies. Withdrawing
+      removes it from the next dump; it does not reach the copies. Do not claim
+      a network at a private address, and do not claim one that carries anything
+      you would not put on a public map.</p>
+    </div>
+
+    <p>If that is not what you want, do nothing. An unclaimed network stays
+    blurred, and you can also
+    <a href="optout.html">keep it out entirely</a>.</p>
+
+    <h2>How verification will work</h2>
+
+    <p>The proof is that you can change the network's name. That is something a
+    person who controls the access point can do and a passer-by cannot.</p>
+
+    <ol class="steps">
+      <li><b>Start the claim.</b>
+        You give the network name, the venue name and kind, the hardware
+        addresses you want covered, and whether the password should be
+        published. An email address is optional and is used only to send you the
+        code and to reach you about the claim. It is never published.</li>
+      <li><b>Get a challenge code.</b>
+        The server issues a short code, like <code>ws-4f2a9c</code>, which
+        expires.</li>
+      <li><b>Append it to the network name.</b>
+        <code>Bar Centrale</code> becomes <code>Bar Centrale ws-4f2a9c</code>.
+        Save it on the router. People already connected may have to rejoin.</li>
+      <li><b>Confirm on site.</b>
+        An app on the premises sees the renamed network and confirms it,
+        together with the hardware address it is broadcasting from. That ties
+        the claim to real hardware in the building.</li>
+      <li><b>Put the name back.</b>
+        Once verified, the network is marked owner-verified and the code is no
+        longer needed.</li>
+    </ol>
+
+    <p>The confirmation step is why an app matters: somebody has to be standing
+    in the building to see the renamed network on air. The apps do not exist
+    yet, which is why this whole flow does not either.</p>
+
+    <h2>What changes when a network is verified</h2>
+
+    <div class="table-scroll">
+      <table>
+        <caption>The same network, before and after a claim</caption>
+        <thead>
+          <tr>
+            <th scope="col"></th>
+            <th scope="col">Unclaimed</th>
+            <th scope="col">Owner-verified</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">How it got there</th>
+            <td>Somebody's app saw it while walking past</td>
+            <td>You asked for it and proved you control it</td>
+          </tr>
+          <tr>
+            <th scope="row">Position</th>
+            <td>Centre of a cell about 150 m across</td>
+            <td>Exact, to 5 decimal places, stated precision 10 m</td>
+          </tr>
+          <tr>
+            <th scope="row">Hardware addresses</th>
+            <td>Never published</td>
+            <td>Published</td>
+          </tr>
+          <tr>
+            <th scope="row">Venue name</th>
+            <td>Not published</td>
+            <td>Published</td>
+          </tr>
+          <tr>
+            <th scope="row">Password</th>
+            <td>Not collected at all</td>
+            <td>Published only if you mark it public</td>
+          </tr>
+          <tr>
+            <th scope="row">Appears after</th>
+            <td>At least 3 sightings on at least 2 days</td>
+            <td>Verification</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Questions a venue usually asks</h2>
+
+    <dl>
+      <dt>Do we have to publish the password?</dt>
+      <dd>No. You can list the network without it, which tells people the Wi-Fi
+      exists and that they should ask. That choice is a field in the claim, not
+      an afterthought.</dd>
+
+      <dt>What if we use a sign-in page?</dt>
+      <dd>That is recorded as a captive portal, so people know before they walk
+      in that joining will involve a page and possibly a code.</dd>
+
+      <dt>Can somebody else claim our network?</dt>
+      <dd>Not without changing its name on our router, which needs access to it.
+      That is the whole point of the challenge.</dd>
+
+      <dt>Do we have to keep the code in the name?</dt>
+      <dd>No. It is needed only for the confirmation, then you put the name
+      back.</dd>
+
+      <dt>Can we change our mind?</dt>
+      <dd>Yes. A network withdrawn by its owner is unpublished. Copies of
+      earlier published files are outside anyone's control, which is worth
+      weighing before you start, not after.</dd>
+
+      <dt>Will you charge for this, or show our venue as an advert?</dt>
+      <dd>No. There is no payment, no ranking and no advertising anywhere in the
+      design. The data is open and anyone can use it, including people who
+      compete with us.</dd>
+
+      <dt>Is there a badge or a sticker for the window?</dt>
+      <dd>Not yet, and we would rather not invent one before there is anything
+      to put on it.</dd>
+    </dl>
+
+    <h2>Councils, libraries and anyone with a lot of access points</h2>
+
+    <p>The claim format takes a list of hardware addresses, so one claim can
+    cover every access point in a building or a square. The flow above is still
+    per-claim and still needs somebody on site with an app. If you run public
+    Wi-Fi at scale and already hold an authoritative list of your access points,
+    that is a different and better import path, and it does not exist yet. It is
+    worth an issue on
+    <a href="https://github.com/WiFiShare/spec">spec</a> before it gets designed
+    without you.</p>
+
+    <h2>What we will never ask you for</h2>
+
+    <ul>
+      <li>Your administrator password, or access to your router.</li>
+      <li>Payment.</li>
+      <li>Anything about the people using your Wi-Fi. The project collects
+      nothing about them, and would not know what to do with it.</li>
+    </ul>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <div>
+        <h2>Project</h2>
+        <ul role="list">
+          <li><a href="https://github.com/WiFiShare">GitHub organisation</a></li>
+          <li><a href="https://github.com/WiFiShare/spec">spec</a></li>
+          <li><a href="https://github.com/WiFiShare/data">data</a></li>
+          <li><a href="contribute.html">Contribute</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>This site</h2>
+        <ul role="list">
+          <li><a href="privacy.html">Privacy policy (draft)</a></li>
+          <li><a href="optout.html">Opt a network out</a></li>
+          <li><a href="https://github.com/WiFiShare/wifishare.github.io">Source of this site</a></li>
+        </ul>
+      </div>
+    </div>
+    <p>Site code is MIT. Site text is
+      <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+      The published data is
+      <a href="https://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a>.</p>
+    <p class="status-line">No cookies, no analytics, no third-party embeds.
+      WiFiShare is in early development: no data is collected, no app is
+      released and the API is not live.</p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contribute — WiFiShare</title>
+<meta name="description" content="How to help build WiFiShare: which repository needs what, why privacy-filter changes need spec fixtures, and the code of conduct.">
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <p class="brand-block">
+      <a class="brand" href="index.html">WiFiShare</a>
+      <span class="brand-tag">Early development. Nothing is collected yet.</span>
+    </p>
+    <nav class="site-nav" aria-label="Main">
+      <ul role="list">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="how-it-works.html">How it works</a></li>
+        <li><a href="map.html">Map</a></li>
+        <li><a href="apps.html">Apps</a></li>
+        <li><a href="venues.html">Venues</a></li>
+        <li><a href="developers.html">Developers</a></li>
+        <li><a href="privacy.html">Privacy</a></li>
+        <li><a href="optout.html">Opt out</a></li>
+        <li><a href="contribute.html" aria-current="page">Contribute</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+
+    <h1>Contribute</h1>
+
+    <p class="lede">The project is at the stage where most of the open work is
+    specification, scaffolding and review rather than features. That is a good
+    stage to arrive at: the decisions that are expensive to change later are
+    being made now.</p>
+
+    <h2>Where the work is</h2>
+
+    <p>Issues live in the repository they affect, not in a central tracker.
+    Start there. For anything that crosses repositories, open the issue on
+    <a href="https://github.com/WiFiShare/spec">spec</a>, because the
+    specification is what the others agree on.</p>
+
+    <div class="table-scroll">
+      <table>
+        <caption>What each repository is, and what it needs now</caption>
+        <thead>
+          <tr>
+            <th scope="col">Repository</th>
+            <th scope="col">What it holds</th>
+            <th scope="col">What it needs</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row"><a href="https://github.com/WiFiShare/spec">spec</a></th>
+            <td>Data model, JSON Schemas, OpenAPI, privacy rules R1–R12 and
+            P1–P8, test fixtures</td>
+            <td>Review, mostly. Holes in the hotspot name patterns, rules that
+            are ambiguous when you try to implement them, and fixtures for cases
+            nobody has thought of. A missed pattern costs somebody's
+            privacy.</td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="https://github.com/WiFiShare/api">api</a></th>
+            <td>Django backend: ingest, area lookups, dump export</td>
+            <td>Everything. This is phase P1 and it blocks the apps. Ingest with
+            HPKE decryption, server-side re-checking of the filter rules, the
+            aggregation job, the claim flow, and the weekly export.</td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="https://github.com/WiFiShare/android">android</a></th>
+            <td>Kotlin app that scans, shares and joins</td>
+            <td>A project skeleton, the on-device filter tested against the
+            fixtures, a geohash implementation, a client for area files, an
+            offline cache, and the scan and share flows.</td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="https://github.com/WiFiShare/ios">ios</a></th>
+            <td>Swift app that finds and joins</td>
+            <td>A project skeleton with the two entitlements declared, a geohash
+            implementation, a data client, an offline cache, the join flow
+            around the system prompt, the share flow for the current network,
+            and an honest presentation of precision.</td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="https://github.com/WiFiShare/data">data</a></th>
+            <td>The weekly public dump</td>
+            <td>Nothing to publish yet. Problems in published data, once there
+            is any, go here as a <code>Network problem</code> issue.</td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="https://github.com/WiFiShare/wifishare.github.io">wifishare.github.io</a></th>
+            <td>This website</td>
+            <td>Corrections, accessibility problems, translations, and anything
+            here that overstates what exists.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>If what you want to do is not covered by an issue, open one in that
+    repository first and say what you intend. It avoids two people building the
+    same thing in different directions, which is easy while the data model is
+    still moving.</p>
+
+    <h2>Privacy-filter changes need spec fixtures</h2>
+
+    <div class="banner banner--warn">
+      <p><strong class="banner-title">A rule without a fixture is not a rule.</strong>
+      A change to filter behaviour in any repository must come with test
+      fixtures in <a href="https://github.com/WiFiShare/spec">spec</a> that
+      demonstrate the new behaviour, and the implementation must be tested
+      against them. A pull request that changes any of this without fixtures
+      will be asked for them before review.</p>
+    </div>
+
+    <p>This applies to, among other things:</p>
+
+    <ul>
+      <li>the <code>_nomap</code> and <code>_optout</code> endings, which are
+      never collected;</li>
+      <li>whether a network is collected at all, including password-protected
+      networks, which are excluded unless their owner shares them
+      deliberately;</li>
+      <li>the precision of a published position, and which networks get an exact
+      one;</li>
+      <li>whether a hardware address is published;</li>
+      <li>the mobile-network rule, which excludes networks seen more than 1 km
+      apart.</li>
+    </ul>
+
+    <p>The reason is plain: a privacy rule that exists only in prose gets broken
+    by the next refactor, and a broken filter publishes something about
+    somebody. The fixtures are the acceptance test. A client that drops a
+    network the fixtures keep is merely less useful; a client that keeps a
+    network the fixtures drop is a privacy bug and must not ship.</p>
+
+    <p>Two things implementations must not get creative about: evaluate the
+    age rule against the <code>now</code> field in the fixture file rather than
+    the wall clock, or the suite rots; and apply the drop rules in numeric
+    order, reporting the first that matches, because several rules often apply
+    to the same network and the fixtures pin which one is reported.</p>
+
+    <h2>Changing the specification</h2>
+
+    <ol class="steps">
+      <li><b>Open an issue</b> describing the behaviour change.</li>
+      <li><b>Change the rule text and the fixtures in the same pull
+      request.</b></li>
+      <li><b>Update the changelog.</b> A wire format that breaks a released
+      client gets a new schema id, such as <code>wifishare.batch/2</code>, never
+      a silent change to an existing one.</li>
+    </ol>
+
+    <h2>Pull requests</h2>
+
+    <ul>
+      <li>One logical change per pull request. A refactor and a behaviour change
+      in the same diff are hard to review and harder to revert.</li>
+      <li>Commit messages in the imperative mood, with a short subject and a
+      body that says why. The diff already says what.</li>
+      <li>Reference the issue the pull request closes, and keep the template
+      filled in.</li>
+      <li>Say whether the change affects what is collected or what is published.
+      If it does, link the fixtures.</li>
+      <li>Run that repository's tests and linters first. The commands are in its
+      README.</li>
+      <li>Expect review comments on anything touching the data model, the filter
+      or a platform permission. Those are the parts that are expensive to change
+      later.</li>
+    </ul>
+
+    <h2>Licensing of contributions</h2>
+
+    <p>There is no contributor licence agreement, the DCO is not required, and
+    no sign-off is needed on commits. By opening a pull request you agree your
+    contribution is licensed under the licence of the repository it lands in:
+    AGPL-3.0 for the backend, MPL-2.0 for the apps, Apache-2.0 for the
+    specification, ODbL-1.0 for the data, and MIT for code with CC-BY-4.0 for
+    text on this website.</p>
+
+    <p>Do not contribute code or data you do not have the right to relicense
+    that way. In particular, do not import network data from another database
+    whose terms do not allow it.</p>
+
+    <h2>Working on this website</h2>
+
+    <p>It is hand-written HTML, one CSS file and two small JavaScript modules.
+    There is no build step, no framework and no dependency to install:</p>
+
+<pre><code>git clone https://github.com/WiFiShare/wifishare.github.io.git
+cd wifishare.github.io
+python3 -m http.server 8000</code></pre>
+
+    <p>Things worth keeping when you change it: every page except the map works
+    with JavaScript disabled; no cookies, no analytics and no third-party
+    embeds; no web fonts; and no claim that something exists when it does
+    not.</p>
+
+    <h2>Code of conduct</h2>
+
+    <p>The project uses the
+    <a href="https://www.contributor-covenant.org/version/2/1/code_of_conduct.html">Contributor
+    Covenant, version 2.1</a>. The full text is in the organisation's
+    <a href="https://github.com/WiFiShare/.github/blob/main/CODE_OF_CONDUCT.md">CODE_OF_CONDUCT.md</a>
+    and it applies in every community space, and when someone is representing
+    the project in public.</p>
+
+    <p>In short: be empathetic and respectful, accept feedback gracefully, take
+    responsibility when you get something wrong, and focus on what is best for
+    the community. Harassment, insults, personal or political attacks, and
+    publishing anyone's private information without their permission are not
+    tolerated. Reports go to the organisation owners through GitHub private
+    vulnerability reporting, or by opening an issue if the matter is not
+    sensitive. Reporters' privacy is respected.</p>
+
+    <h2>Reporting a vulnerability</h2>
+
+    <p>Not in a pull request and not in a public issue. Use GitHub private
+    vulnerability reporting on the affected repository, or on
+    <a href="https://github.com/WiFiShare/spec/security">spec</a> if you are not
+    sure which one it is. The
+    <a href="https://github.com/WiFiShare/.github/blob/main/SECURITY.md">security
+    policy</a> has the scope.</p>
+
+    <p>A failure of the three privacy rules is a vulnerability, not a feature
+    request: a way to make the system collect a network ending in
+    <code>_nomap</code>, to collect a private network its owner has not shared,
+    to publish a community-found network's hardware address or a finer position
+    than its cell, or to link observations back to a person. There is no bug
+    bounty, no funding and no swag. What you get is a reply, credit in the
+    advisory if you want it, and a fix.</p>
+
+    <p>A problem with one specific Wi-Fi network's privacy is not a
+    vulnerability report. That is the <a href="optout.html">opt-out path</a>.</p>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <div>
+        <h2>Project</h2>
+        <ul role="list">
+          <li><a href="https://github.com/WiFiShare">GitHub organisation</a></li>
+          <li><a href="https://github.com/WiFiShare/spec">spec</a></li>
+          <li><a href="https://github.com/WiFiShare/data">data</a></li>
+          <li><a href="contribute.html">Contribute</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>This site</h2>
+        <ul role="list">
+          <li><a href="privacy.html">Privacy policy (draft)</a></li>
+          <li><a href="optout.html">Opt a network out</a></li>
+          <li><a href="https://github.com/WiFiShare/wifishare.github.io">Source of this site</a></li>
+        </ul>
+      </div>
+    </div>
+    <p>Site code is MIT. Site text is
+      <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+      The published data is
+      <a href="https://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a>.</p>
+    <p class="status-line">No cookies, no analytics, no third-party embeds.
+      WiFiShare is in early development: no data is collected, no app is
+      released and the API is not live.</p>
+  </div>
+</footer>
+
+</body>
+</html>

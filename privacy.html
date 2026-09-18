@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy policy (draft) — WiFiShare</title>
+<meta name="description" content="Draft privacy policy for WiFiShare. Not final: the data controller has not been decided and nothing is being collected yet.">
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <p class="brand-block">
+      <a class="brand" href="index.html">WiFiShare</a>
+      <span class="brand-tag">Early development. Nothing is collected yet.</span>
+    </p>
+    <nav class="site-nav" aria-label="Main">
+      <ul role="list">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="how-it-works.html">How it works</a></li>
+        <li><a href="map.html">Map</a></li>
+        <li><a href="apps.html">Apps</a></li>
+        <li><a href="venues.html">Venues</a></li>
+        <li><a href="developers.html">Developers</a></li>
+        <li><a href="privacy.html" aria-current="page">Privacy</a></li>
+        <li><a href="optout.html">Opt out</a></li>
+        <li><a href="contribute.html">Contribute</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+
+    <h1>Privacy policy</h1>
+
+    <div class="banner banner--draft">
+      <p><strong class="banner-title">Draft. Not a policy you can rely on yet.</strong>
+      This document is published early so that it can be read and argued with
+      while the design is still changeable. It is not final and it is not a
+      contract.</p>
+      <p>Two things are missing, and no wording can fill them in: <strong>the
+      data controller has not been decided</strong>
+      (<code>[Data controller: to be decided]</code>), and there is no legal
+      entity behind the project yet. Placeholders below mark every point where a
+      real name, address or authority has to be written in before this becomes a
+      policy.</p>
+      <p>Nothing is being collected today. No app has been released, the API is
+      not live, and the published dump is empty. Until that changes, this
+      describes an intention rather than a practice.</p>
+    </div>
+
+    <p class="lede">WiFiShare collects observations of Wi-Fi networks so that
+    people can find and join free ones. It is built so that an observation
+    cannot be tied back to the person whose phone made it.</p>
+
+    <h2>Who is responsible</h2>
+
+    <dl>
+      <dt>Data controller</dt>
+      <dd><code>[Data controller: to be decided]</code>. The project is run by
+      volunteers and has no legal entity. Deciding who the controller is, and
+      where they are established, is open work and blocks this policy being
+      finished.</dd>
+
+      <dt>Contact for privacy questions</dt>
+      <dd><code>[Contact address: to be decided]</code>. In the meantime, open
+      an issue on the
+      <a href="https://github.com/WiFiShare/spec">spec</a> repository. Issues
+      are public, so do not put personal details in one.</dd>
+
+      <dt>Data protection officer</dt>
+      <dd><code>[DPO: to be decided, if one is required]</code>.</dd>
+
+      <dt>Supervisory authority</dt>
+      <dd><code>[Supervisory authority: depends on where the controller is
+      established]</code>. You may complain to the authority in the country
+      where you live, whatever the answer turns out to be.</dd>
+
+      <dt>Where processing happens</dt>
+      <dd><code>[Hosting and location: to be decided]</code>. The address in the
+      API specification, <code>api.wifishare.example</code>, is a placeholder,
+      not a server.</dd>
+    </dl>
+
+    <h2>What will be collected</h2>
+
+    <h3>From an app that is contributing</h3>
+
+    <p>One record per sighting of one network, and nothing else. The record is
+    fixed by the specification, and a record carrying any field outside it is
+    thrown away by the app and again by the server:</p>
+
+    <div class="table-scroll">
+      <table>
+        <caption>An observation, in full</caption>
+        <thead>
+          <tr><th scope="col">Field</th><th scope="col">What it is</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Network name</th><td>The name the network broadcasts.</td></tr>
+          <tr><th scope="row">Hardware address</th><td>The access point's BSSID. Never published for a network found this way.</td></tr>
+          <tr><th scope="row">Security type</th><td>Open, or open with encryption (OWE). Nothing else is collected.</td></tr>
+          <tr><th scope="row">Captive portal</th><td>Whether the device actually met a sign-in page.</td></tr>
+          <tr><th scope="row">Position</th><td>The phone's own position when it saw the network, rounded to 4 decimal places, about 11 m.</td></tr>
+          <tr><th scope="row">Accuracy</th><td>How good that position fix was. Worse than 50 m is dropped.</td></tr>
+          <tr><th scope="row">Signal strength</th><td>Used to weight the position estimate.</td></tr>
+          <tr><th scope="row">Channel</th><td>The channel centre frequency, when the platform reports it.</td></tr>
+          <tr><th scope="row">Time</th><td>Truncated to the hour, in UTC.</td></tr>
+          <tr><th scope="row">Source</th><td>Whether the phone was scanning or was connected to the network.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>The batch that carries these records says only which platform the app
+    runs on and its major and minor version, so that a version with a known
+    filter bug can be refused. It carries no identifier, no sequence number and
+    no timestamp of its own, so two batches from one phone cannot be linked. It
+    is encrypted on the phone before it is sent, so intermediaries and logs
+    never see it.</p>
+
+    <h3>What is never collected</h3>
+
+    <ul>
+      <li>No account, name, email address or telephone number for a contributor.
+      There are no accounts.</li>
+      <li>No device identifier, model, operating-system build, advertising
+      identifier or installation identifier.</li>
+      <li>No list of the networks your device has saved or joined in the past.</li>
+      <li>No hidden networks, and no network whose name ends in
+      <code>_nomap</code> or <code>_optout</code>.</li>
+      <li>No phone hotspots, as far as the rules can detect them: addresses that
+      are locally administered, and names matching the personal-hotspot
+      patterns.</li>
+      <li>No password-protected network. Those enter only when their owner
+      shares them deliberately.</li>
+      <li>No continuous track of where you have been. An observation is of a
+      network, not of you, and observations are not linked to each other.</li>
+    </ul>
+
+    <h3>From a venue that claims a network</h3>
+
+    <p>A venue that verifies its own network gives its name, the network's name
+    and hardware addresses, optionally a password to publish, and optionally an
+    email address. The email address is used only to send the challenge code and
+    to reach the venue about the claim, and is never published. Everything else
+    a venue supplies is published as open data, which is the point of claiming,
+    and the claim flow has to say so before the venue confirms.</p>
+
+    <h3>From this website</h3>
+
+    <p>This site sets no cookies, contains no analytics and stores nothing in
+    your browser. It is served by GitHub Pages, which sees the usual request
+    information including your IP address; see
+    <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">GitHub's
+    privacy statement</a>. The map page, and only the map page, loads a map
+    library from a public CDN and background tiles from the provider named on
+    that page; both will see your IP address and which map tiles you asked for.
+    If you would rather not, do not open the map: nothing else on the site makes
+    a third-party request. The map never asks for your location.</p>
+
+    <h2>Why, and on what legal basis</h2>
+
+    <p>The wording here is provisional and has to be reviewed by someone
+    qualified before it is relied on: <code>[Legal review: not yet
+    done]</code>.</p>
+
+    <div class="table-scroll">
+      <table>
+        <caption>Purposes and intended legal bases under the GDPR</caption>
+        <thead>
+          <tr>
+            <th scope="col">Purpose</th>
+            <th scope="col">Intended basis</th>
+            <th scope="col">Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Building a public map of free and open Wi-Fi from observations</td>
+            <td>Legitimate interests, Article 6(1)(f)</td>
+            <td>The interest is helping people get online, including people who
+            cannot afford mobile data. The balancing test is the filter and
+            publish rules themselves: private and hidden networks are excluded,
+            hotspots are excluded, opted-out names are excluded, and what is
+            published is blurred to about 150 m without a hardware address.
+            <code>[Legitimate interests assessment: to be written]</code>.</td>
+          </tr>
+          <tr>
+            <td>Publishing a venue's own network, exactly, with its name</td>
+            <td>Consent, Article 6(1)(a)</td>
+            <td>The venue asks for it, proves control of the network, and is
+            told in plain words what becomes public before confirming.</td>
+          </tr>
+          <tr>
+            <td>Keeping the service up and refusing abuse</td>
+            <td>Legitimate interests, Article 6(1)(f)</td>
+            <td>A rate-limit bucket, which is a hash of the IP address under a
+            salt that rotates daily.</td>
+          </tr>
+          <tr>
+            <td>Honouring an opt-out</td>
+            <td>Legal obligation, Article 6(1)(c), and legitimate interests</td>
+            <td>The opt-out list stores a hardware address only as an HMAC under
+            a server-held key, so a network can be kept out without keeping it
+            on file.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>A network name and hardware address are not usually personal data on
+    their own, but they can be: a home router named after a family is about that
+    family. That is why the rules exclude hidden networks, hotspots,
+    password-protected networks and opted-out names before anything is stored,
+    and why what remains is published without a hardware address and at about
+    150 m.</p>
+
+    <p>On collecting network names at all: Opinion 13/2011 of the Article 29
+    Working Party says collecting SSIDs is excessive <em>for offering
+    geolocation services</em>, because a positioning database does not need the
+    name. WiFiShare is not a positioning database. The name is the thing a
+    person selects in order to connect, and it is what tells them a network is a
+    library rather than a flat. It is collected for that, and for nothing
+    else.</p>
+
+    <h2>How long things are kept</h2>
+
+    <div class="table-scroll">
+      <table>
+        <caption>Retention, as fixed by rules P6 and P7 of the specification</caption>
+        <thead>
+          <tr><th scope="col">What</th><th scope="col">Kept for</th><th scope="col">Then</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Raw observations</th>
+            <td>Up to 7 days after the aggregation that used them</td>
+            <td>Deleted by a scheduled job, not by hand.</td>
+          </tr>
+          <tr>
+            <th scope="row">Observations waiting on the phone</th>
+            <td>7 days</td>
+            <td>Dropped by the app, never sent.</td>
+          </tr>
+          <tr>
+            <th scope="row">Rate-limit bucket hashes</th>
+            <td>24 hours</td>
+            <td>Deleted by a scheduled job.</td>
+          </tr>
+          <tr>
+            <th scope="row">A published network</th>
+            <td>While it is still being seen</td>
+            <td>Unpublished after 12 months without an observation, or after 3
+            reports saying it is private or gone, or when its owner withdraws
+            it.</td>
+          </tr>
+          <tr>
+            <th scope="row">Opt-out entries</th>
+            <td>Indefinitely, as an HMAC</td>
+            <td>Kept on purpose. An opt-out that expired would not be an
+            opt-out.</td>
+          </tr>
+          <tr>
+            <th scope="row">The published dump on GitHub</th>
+            <td>Weekly files, monthly snapshots</td>
+            <td>History is squashed monthly so that a removed network does not
+            stay readable in an old commit.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Once a network leaves the published dump, copies other people already
+    downloaded are outside anyone's control. That is true of all open data and
+    it is worth knowing before you decide whether to share a network.</p>
+
+    <h2>Who else sees the data</h2>
+
+    <ul>
+      <li><strong>Everyone.</strong> The published subset is open data under the
+      <a href="https://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a> and
+      is meant to be copied. What is published is limited by design, not by
+      access control.</li>
+      <li><strong>Hosting and infrastructure providers</strong>, once there are
+      any: <code>[Processors: to be decided]</code>. A list with the purpose of
+      each has to be written here before launch.</li>
+      <li>Nothing is sold, and nothing is shared for advertising. There are no
+      advertising identifiers to share.</li>
+      <li><strong>International transfers</strong>:
+      <code>[Transfers outside the EEA: to be decided with hosting]</code>.</li>
+    </ul>
+
+    <h2>Your rights</h2>
+
+    <p>Under the GDPR you have the right to ask for access to your personal
+    data, to have it corrected or erased, to have processing restricted, to
+    object to processing based on legitimate interests, to receive data you
+    provided in a portable form, and to complain to a supervisory authority.</p>
+
+    <p>There is an honest difficulty here, and it goes both ways.</p>
+
+    <div class="banner banner--note">
+      <p><strong class="banner-title">We will usually not be able to identify your data</strong>
+      The design keeps nothing that ties an observation to a person: no account,
+      no device identifier, no batch identifier. That is the third privacy rule
+      and it is the point. The consequence is that if you ask "what do you hold
+      about me", there is no honest way to answer, because there is no way to
+      tell your observations from anyone else's. Article 11 of the GDPR covers
+      this case: a controller who cannot identify a person is not required to
+      obtain more information in order to do so. We will not start collecting
+      identifiers so that we can answer access requests.</p>
+    </div>
+
+    <p>What does work is the network-level route, and it needs no account and no
+    proof:</p>
+
+    <ul>
+      <li><strong>Erasure and objection for a network you control:</strong>
+      rename it so its name ends in <code>_nomap</code> or <code>_optout</code>,
+      or use the opt-out once it exists. See
+      <a href="optout.html">how to keep a network out</a>. This is the fastest
+      and most complete route, because it also stops future collection.</li>
+      <li><strong>Correction:</strong> a wrong position or a network that no
+      longer exists can be reported as a <code>Network problem</code> issue on
+      the <a href="https://github.com/WiFiShare/data">data</a> repository. Do not
+      put a hardware address or a password in a public issue.</li>
+      <li><strong>Complaint:</strong> to
+      <code>[Supervisory authority: depends on where the controller is
+      established]</code>, or to the authority where you live.</li>
+    </ul>
+
+    <p>There is no automated decision-making with legal or similarly significant
+    effects, and no profiling.</p>
+
+    <h2>Children</h2>
+
+    <p>The service is not directed at children and asks nobody their age,
+    because it asks nobody anything. It has no accounts and collects no personal
+    details from the people who use it.</p>
+
+    <h2>Security</h2>
+
+    <p>Batches are encrypted on the device with HPKE before they are sent, so a
+    proxy or a log does not see them. Opt-out entries are stored as keyed
+    hashes. Vulnerability reports go through GitHub private vulnerability
+    reporting on the affected repository; see the project's
+    <a href="https://github.com/WiFiShare/.github/blob/main/SECURITY.md">security
+    policy</a>. A failure of the three privacy rules is treated as a security
+    problem, not a feature request.</p>
+
+    <h2>Changes</h2>
+
+    <p>This draft will change, and it will change most when the controller
+    question is answered. The history of every version is public in the
+    <a href="https://github.com/WiFiShare/wifishare.github.io">website
+    repository</a>. Before any data is collected from anyone, this page has to
+    stop being a draft.</p>
+
+    <p class="status-line">Last updated 18 September 2026. Status: draft, not in
+    force, nothing collected.</p>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <div>
+        <h2>Project</h2>
+        <ul role="list">
+          <li><a href="https://github.com/WiFiShare">GitHub organisation</a></li>
+          <li><a href="https://github.com/WiFiShare/spec">spec</a></li>
+          <li><a href="https://github.com/WiFiShare/data">data</a></li>
+          <li><a href="contribute.html">Contribute</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>This site</h2>
+        <ul role="list">
+          <li><a href="privacy.html">Privacy policy (draft)</a></li>
+          <li><a href="optout.html">Opt a network out</a></li>
+          <li><a href="https://github.com/WiFiShare/wifishare.github.io">Source of this site</a></li>
+        </ul>
+      </div>
+    </div>
+    <p>Site code is MIT. Site text is
+      <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+      The published data is
+      <a href="https://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a>.</p>
+    <p class="status-line">No cookies, no analytics, no third-party embeds.
+      WiFiShare is in early development: no data is collected, no app is
+      released and the API is not live.</p>
+  </div>
+</footer>
+
+</body>
+</html>

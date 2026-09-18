@@ -1,0 +1,112 @@
+{
+  "type": "FeatureCollection",
+  "schema": "wifishare.area/1",
+  "cell": "srbj4",
+  "generated": "2026-09-18",
+  "license": "ODbL-1.0",
+  "attribution": "WiFiShare contributors",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "q4m7vbz3f2ka",
+      "geometry": { "type": "Point", "coordinates": [11.3427, 44.49394] },
+      "properties": {
+        "id": "q4m7vbz3f2ka",
+        "ssid": "SAMPLE Example Library",
+        "security": "open",
+        "captive_portal": "none",
+        "verification": "community",
+        "lat": 44.49394,
+        "lon": 11.3427,
+        "precision_m": 150,
+        "cell": "srbj45g",
+        "first_seen": "2026-09-02",
+        "last_seen": "2026-09-16",
+        "reports": { "works": 4, "fails": 0 }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "h6r2ctn5jx4w",
+      "geometry": { "type": "Point", "coordinates": [11.34682, 44.48982] },
+      "properties": {
+        "id": "h6r2ctn5jx4w",
+        "ssid": "SAMPLE Cafe Example",
+        "security": "open",
+        "captive_portal": "detected",
+        "verification": "community",
+        "lat": 44.48982,
+        "lon": 11.34682,
+        "precision_m": 150,
+        "cell": "srbj45n",
+        "first_seen": "2026-09-04",
+        "last_seen": "2026-09-15",
+        "reports": { "works": 2, "fails": 1 }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "d3p7zqf4mv6s",
+      "geometry": { "type": "Point", "coordinates": [11.33858, 44.49806] },
+      "properties": {
+        "id": "d3p7zqf4mv6s",
+        "ssid": "SAMPLE Town Square Free",
+        "security": "owe",
+        "captive_portal": "none",
+        "verification": "community",
+        "lat": 44.49806,
+        "lon": 11.33858,
+        "precision_m": 150,
+        "cell": "srbj4h8",
+        "first_seen": "2026-09-03",
+        "last_seen": "2026-09-17",
+        "reports": { "works": 7, "fails": 1 }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "t5kx2wnr7bq3",
+      "geometry": { "type": "Point", "coordinates": [11.35094, 44.49532] },
+      "properties": {
+        "id": "t5kx2wnr7bq3",
+        "ssid": "SAMPLE Park Bandstand",
+        "security": "open",
+        "captive_portal": "unknown",
+        "verification": "community",
+        "lat": 44.49532,
+        "lon": 11.35094,
+        "precision_m": 150,
+        "cell": "srbj4k1",
+        "first_seen": "2026-09-05",
+        "last_seen": "2026-09-14",
+        "reports": { "works": 1, "fails": 2 }
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "v2jc6hd4ftm5",
+      "geometry": { "type": "Point", "coordinates": [11.34410, 44.49125] },
+      "properties": {
+        "id": "v2jc6hd4ftm5",
+        "ssid": "SAMPLE Museum Guest",
+        "security": "shared",
+        "captive_portal": "none",
+        "verification": "owner-verified",
+        "lat": 44.49125,
+        "lon": 11.34410,
+        "precision_m": 10,
+        "cell": "srbj45k",
+        "first_seen": "2026-09-06",
+        "last_seen": "2026-09-17",
+        "reports": { "works": 9, "fails": 0 },
+        "bssids": ["00:00:5e:00:53:2a", "00:00:5e:00:53:2b"],
+        "venue": { "name": "SAMPLE Museum of Nothing", "kind": "museum" },
+        "credential": {
+          "type": "wpa2-psk",
+          "secret": "sample-not-a-real-password",
+          "note": "Sample record. This venue does not exist."
+        }
+      }
+    }
+  ]
+}

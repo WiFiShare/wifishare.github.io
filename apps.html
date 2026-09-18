@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apps — WiFiShare</title>
+<meta name="description" content="The planned WiFiShare apps for Android and iOS, what each can do, and why iOS cannot scan for networks. Neither app is released.">
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <p class="brand-block">
+      <a class="brand" href="index.html">WiFiShare</a>
+      <span class="brand-tag">Early development. Nothing is collected yet.</span>
+    </p>
+    <nav class="site-nav" aria-label="Main">
+      <ul role="list">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="how-it-works.html">How it works</a></li>
+        <li><a href="map.html">Map</a></li>
+        <li><a href="apps.html" aria-current="page">Apps</a></li>
+        <li><a href="venues.html">Venues</a></li>
+        <li><a href="developers.html">Developers</a></li>
+        <li><a href="privacy.html">Privacy</a></li>
+        <li><a href="optout.html">Opt out</a></li>
+        <li><a href="contribute.html">Contribute</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+
+    <h1>Apps</h1>
+
+    <div class="banner banner--warn">
+      <p><strong class="banner-title">Neither app is released. There is nothing to install.</strong>
+      There is no store listing, no beta, no test build and no waiting list.
+      The Android app is phase P2 and the iOS app is phase P3, both after the
+      data pipeline and API. If you find a "WiFiShare" app in a store today, it
+      is not this project's.</p>
+    </div>
+
+    <p class="lede">Two apps are planned, and they will not be able to do the
+    same things. That is not a roadmap gap. It is a platform rule, and it is
+    worth understanding before you expect feature parity.</p>
+
+    <h2>The short version</h2>
+
+    <div class="table-scroll">
+      <table>
+        <caption>What each app is planned to do</caption>
+        <thead>
+          <tr>
+            <th scope="col"></th>
+            <th scope="col">Android</th>
+            <th scope="col">iOS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Find nearby networks in the published data</th><td>Yes</td><td>Yes</td></tr>
+          <tr><th scope="row">Join a network</th><td>Yes</td><td>Yes, with the system's own prompt</td></tr>
+          <tr><th scope="row">Scan for networks in the air</th><td>Yes</td><td><strong>No. The platform does not allow it.</strong></td></tr>
+          <tr><th scope="row">Contribute while walking around</th><td>Yes, once you turn it on</td><td>No</td></tr>
+          <tr><th scope="row">Share a network</th><td>Networks it scanned, after filtering</td><td>Only the one network the phone is connected to right now</td></tr>
+          <tr><th scope="row">Report a network as working, gone or private</th><td>Yes</td><td>Yes</td></tr>
+          <tr><th scope="row">Remove a network you own, in one tap</th><td>Yes</td><td>Yes</td></tr>
+          <tr><th scope="row">Language</th><td>Kotlin</td><td>Swift</td></tr>
+          <tr><th scope="row">Licence</th><td>MPL-2.0</td><td>MPL-2.0</td></tr>
+          <tr><th scope="row">Phase</th><td>P2</td><td>P3</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Android</h2>
+
+    <p>The Android app is the one that can collect. It scans, applies the filter
+    rules on the device, and sends what survives in an encrypted batch. It also
+    reads the published data, shows what is nearby and joins a network on
+    request.</p>
+
+    <p>Contributing is off until you turn it on. Finding and joining networks
+    works whether or not you ever do.</p>
+
+    <p>The filter runs before anything is stored, so the networks it must not
+    collect never exist on your phone either: hidden networks, names ending in
+    <code>_nomap</code> or <code>_optout</code>, phone hotspots, and every
+    password-protected network. There are no accounts, no device identifiers and
+    no advertising identifiers.</p>
+
+    <p>The repository is
+    <a href="https://github.com/WiFiShare/android">WiFiShare/android</a>. It
+    currently holds a README and a licence: the code has not been written.</p>
+
+    <h2>iOS</h2>
+
+    <p>The iOS app finds networks and joins them. It cannot scan, and it never
+    will.</p>
+
+    <div class="banner banner--note">
+      <p><strong class="banner-title">iOS does not allow apps to scan for Wi-Fi networks</strong>
+      This is a platform rule, not a decision this project made and not
+      something an entitlement unlocks. Apple states it in
+      <a href="https://developer.apple.com/documentation/technotes/tn3111-ios-wifi-api-overview">TN3111:
+      iOS Wi-Fi API overview</a>. Any app that claims to list the Wi-Fi networks
+      around you on an iPhone is doing something else.</p>
+    </div>
+
+    <p>Everything about the app's scope follows from that:</p>
+
+    <dl>
+      <dt>Finding networks means reading the data, not looking at the air.</dt>
+      <dd>The app knows what is nearby because the published dump says so. It
+      fetches the area files for the cells around you and shows what is in
+      them.</dd>
+
+      <dt>Joining uses the system's own mechanism.</dt>
+      <dd><code>NEHotspotConfigurationManager</code>, which shows the system
+      prompt before joining. The app cannot join silently and does not try
+      to.</dd>
+
+      <dt>Sharing is limited to the network you are on.</dt>
+      <dd>Read with <code>NEHotspotNetwork.fetchCurrent</code>. One network at a
+      time, the one you are already connected to. There is no walk-and-collect
+      mode on iOS and there cannot be. In the data, an observation from iOS can
+      only ever be marked as coming from a connection, never from a scan.</dd>
+    </dl>
+
+    <p>If you have used the Android app, that is the difference to expect: on
+    Android the app can walk and collect, on iOS it can only contribute the
+    network you are already connected to.</p>
+
+    <h3>Requirements and entitlements</h3>
+
+    <p>Minimum iOS 17, because the app uses HPKE from CryptoKit, which requires
+    it. That is the only reason, and if the crypto design in the specification
+    changes, the minimum should be revisited rather than kept out of habit.</p>
+
+    <div class="table-scroll">
+      <table>
+        <caption>The two entitlements, and what each is for</caption>
+        <thead>
+          <tr><th scope="col">Entitlement</th><th scope="col">Why</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Access Wi-Fi Information</th>
+            <td>To read the current network with
+            <code>NEHotspotNetwork.fetchCurrent</code>, which is what sharing is
+            built on.</td>
+          </tr>
+          <tr>
+            <th scope="row">Hotspot Configuration</th>
+            <td>To join a network with
+            <code>NEHotspotConfigurationManager</code>.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Neither grants scanning. Nothing does.</p>
+
+    <p>The repository is <a href="https://github.com/WiFiShare/ios">WiFiShare/ios</a>.
+    It currently holds the plan and a licence: the code has not been
+    written.</p>
+
+    <h2>What both apps will do about precision</h2>
+
+    <p>A community-found network is known to about 150 m, so an app must not
+    draw it as a pin on a building. Showing it honestly — as an area, with the
+    precision stated — is a requirement in both apps, not a nicety. The same
+    goes for this site's <a href="map.html">map</a>.</p>
+
+    <h2>Helping</h2>
+
+    <p>Both repositories are open and both are at the stage where the useful
+    work is the part that does not depend on the API being finished: a project
+    skeleton, a geohash implementation, a client that reads area files, an
+    offline cache, the join and share flows, and accessibility and localisation
+    from the start rather than retrofitted. Open an issue in the repository
+    before starting something substantial. See
+    <a href="contribute.html">how to contribute</a>.</p>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <div>
+        <h2>Project</h2>
+        <ul role="list">
+          <li><a href="https://github.com/WiFiShare">GitHub organisation</a></li>
+          <li><a href="https://github.com/WiFiShare/spec">spec</a></li>
+          <li><a href="https://github.com/WiFiShare/data">data</a></li>
+          <li><a href="contribute.html">Contribute</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>This site</h2>
+        <ul role="list">
+          <li><a href="privacy.html">Privacy policy (draft)</a></li>
+          <li><a href="optout.html">Opt a network out</a></li>
+          <li><a href="https://github.com/WiFiShare/wifishare.github.io">Source of this site</a></li>
+        </ul>
+      </div>
+    </div>
+    <p>Site code is MIT. Site text is
+      <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+      The published data is
+      <a href="https://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a>.</p>
+    <p class="status-line">No cookies, no analytics, no third-party embeds.
+      WiFiShare is in early development: no data is collected, no app is
+      released and the API is not live.</p>
+  </div>
+</footer>
+
+</body>
+</html>

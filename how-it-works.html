@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How WiFiShare works — WiFiShare</title>
+<meta name="description" content="The WiFiShare pipeline in plain words: filtering on the phone, an encrypted batch, aggregation, publish thresholds and a weekly dump on GitHub.">
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <p class="brand-block">
+      <a class="brand" href="index.html">WiFiShare</a>
+      <span class="brand-tag">Early development. Nothing is collected yet.</span>
+    </p>
+    <nav class="site-nav" aria-label="Main">
+      <ul role="list">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="how-it-works.html" aria-current="page">How it works</a></li>
+        <li><a href="map.html">Map</a></li>
+        <li><a href="apps.html">Apps</a></li>
+        <li><a href="venues.html">Venues</a></li>
+        <li><a href="developers.html">Developers</a></li>
+        <li><a href="privacy.html">Privacy</a></li>
+        <li><a href="optout.html">Opt out</a></li>
+        <li><a href="contribute.html">Contribute</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+
+    <h1>How it works</h1>
+
+    <p class="lede">From a phone that sees a network to a file anyone can
+    download. Five steps, and a long list of things that never make it past the
+    first one.</p>
+
+    <div class="banner banner--note">
+      <p><strong class="banner-title">Described in the present tense, built in the future tense</strong>
+      This page describes the design that the specification fixes. None of it is
+      running yet: no app has been released, the API is not live and the dump is
+      empty.</p>
+    </div>
+
+    <figure>
+      <svg viewBox="0 0 320 430" width="320" height="430" role="img" aria-labelledby="pipe-title pipe-desc">
+        <title id="pipe-title">The WiFiShare pipeline</title>
+        <desc id="pipe-desc">Five stages in a vertical line: the phone filters,
+        the batch is encrypted, it is posted to the API, the server aggregates
+        and applies publish rules, and area files are published through the API
+        and the weekly dump. The same stages are listed as text below.</desc>
+        <g fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="8" y="8" width="304" height="52" rx="8"></rect>
+          <rect x="8" y="98" width="304" height="52" rx="8"></rect>
+          <rect x="8" y="188" width="304" height="52" rx="8"></rect>
+          <rect x="8" y="278" width="304" height="52" rx="8"></rect>
+          <rect x="8" y="368" width="304" height="52" rx="8"></rect>
+          <path d="M160 60 v30 M154 84 l6 8 l6 -8"></path>
+          <path d="M160 150 v30 M154 174 l6 8 l6 -8"></path>
+          <path d="M160 240 v30 M154 264 l6 8 l6 -8"></path>
+          <path d="M160 330 v30 M154 354 l6 8 l6 -8"></path>
+        </g>
+        <g fill="currentColor" font-size="13" font-family="system-ui, sans-serif" text-anchor="middle">
+          <text x="160" y="30">1. Phone: filter rules R1–R12</text>
+          <text x="160" y="48" font-size="11">drop, normalise, de-duplicate</text>
+          <text x="160" y="120">2. Batch, encrypted with HPKE</text>
+          <text x="160" y="138" font-size="11">no id, no timestamp, max 200</text>
+          <text x="160" y="210">3. POST /v1/batches</text>
+          <text x="160" y="228" font-size="11">rules checked again on arrival</text>
+          <text x="160" y="300">4. Aggregation: publish rules P1–P8</text>
+          <text x="160" y="318" font-size="11">thresholds, blurring, deletion</text>
+          <text x="160" y="390">5. Area files</text>
+          <text x="160" y="408" font-size="11">API and weekly dump on GitHub</text>
+        </g>
+      </svg>
+      <figcaption>The pipeline. Each stage can only pass on less than it
+      received.</figcaption>
+    </figure>
+
+    <h2>1. The app filters on the device</h2>
+
+    <p>The filter runs on the phone, before anything is stored or queued. An
+    observation that a rule drops never reaches the network at all. The server
+    runs the same rules again when a batch arrives and rejects the whole batch
+    if any observation breaks one, because an old app cannot be trusted to have
+    the current rules.</p>
+
+    <p>What survives is one sighting of one network: the name, the hardware
+    address, whether it is open, whether a captive portal was met, where the
+    phone was, how accurate that position was, the signal strength, the hour it
+    was seen, and whether the phone was scanning or connected. That is the whole
+    record.</p>
+
+    <h3>What is never collected</h3>
+
+    <div class="table-scroll">
+      <table>
+        <caption>Drop rules, from <code>privacy/filter-rules.md</code> in the specification</caption>
+        <thead>
+          <tr>
+            <th scope="col">Rule</th>
+            <th scope="col">Dropped</th>
+            <th scope="col">Why</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">R1</th>
+            <td>Hidden networks, and any network with an empty or missing name</td>
+            <td>A hidden network is not offering itself to anyone.</td>
+          </tr>
+          <tr>
+            <th scope="row">R2</th>
+            <td>Names ending in <code>_nomap</code> or <code>_optout</code></td>
+            <td>The owner used the standard opt-out. Only the ending counts: a
+            network called <code>Bar Nomap</code> is not opted out.</td>
+          </tr>
+          <tr>
+            <th scope="row">R3</th>
+            <td>Locally administered hardware addresses</td>
+            <td>Phone hotspots and randomised addresses live there, and they
+            follow a person around.</td>
+          </tr>
+          <tr>
+            <th scope="row">R4</th>
+            <td>Names that match the personal-hotspot patterns, such as
+            <code>Anna's iPhone</code> or <code>AndroidAP</code></td>
+            <td>A hotspot named after its owner is personal data, and it is not
+            a place.</td>
+          </tr>
+          <tr>
+            <th scope="row">R5</th>
+            <td>Anything that is not open or OWE: every password-protected
+            network</td>
+            <td>A private network enters the database only through its owner,
+            never through a scan.</td>
+          </tr>
+          <tr>
+            <th scope="row">R6</th>
+            <td>Observations with no position fix, or a fix worse than 50&nbsp;m</td>
+            <td>A position we cannot trust would blur the wrong block.</td>
+          </tr>
+          <tr>
+            <th scope="row">R7</th>
+            <td>Observations more than 7 days old in the queue</td>
+            <td>Stale data is not worth the privacy cost of sending it.</td>
+          </tr>
+          <tr>
+            <th scope="row">R8</th>
+            <td>Any observation carrying a field the schema does not define</td>
+            <td>Belt and braces against a future contributor adding a device
+            identifier.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>The hotspot name patterns are anchored on purpose. An unanchored match on
+    <em>iphone</em> would also drop a shop called <code>iPhone Repair Shop
+    WiFi</code>, which is a place and not a person. The specification says
+    plainly that the patterns will never be complete: they are a floor, not a
+    claim of safety.</p>
+
+    <p>Three more things never go in a batch, and the specification does not
+    give them a rule number because they are not negotiable: no device
+    identifier, model, operating-system build, IP address, account, advertising
+    identifier, installation identifier or list of saved networks. The only
+    thing the app says about itself is its platform and its major and minor
+    version, so the server can refuse a version with a known filter bug.</p>
+
+    <h3>What is tidied up before sending</h3>
+
+    <ul>
+      <li>Hardware addresses are written in one form, lowercase with colons (R9).</li>
+      <li>Latitude and longitude are rounded to 4 decimal places, about 11&nbsp;m (R10).</li>
+      <li>The time is truncated to the hour, in UTC (R11).</li>
+    </ul>
+
+    <h2>2. The batch is encrypted before it leaves the phone</h2>
+
+    <p>Up to 200 observations go into one batch. Within a batch only one
+    observation is kept per network, rounded position and hour: the one with the
+    strongest signal. The order is shuffled. The batch carries no identifier, no
+    sequence number, no session and no timestamp of its own, so two batches from
+    one phone cannot be tied together (R12).</p>
+
+    <p>The batch is then sealed with HPKE (<a
+    href="https://www.rfc-editor.org/rfc/rfc9180.html">RFC 9180</a>) to a public
+    key the app ships with and refreshes from the API. Encryption happens before
+    the request, not only in transit, so proxies, content delivery networks and
+    access logs never see a batch in the clear — only the server holding the
+    private key can open it.</p>
+
+    <h2>3. The server checks it again</h2>
+
+    <p>The encrypted batch is posted to <code>POST /v1/batches</code>. There is
+    no account and no token. The server decrypts it, validates every observation
+    against the filter rules a second time, and rejects the whole batch if one
+    of them fails. The reply says how many observations were kept and which
+    rules refused, and never which network.</p>
+
+    <p>The only thing attached to the request is a rate-limit bucket: a hash of
+    the IP address under a salt that rotates daily. Those hashes are deleted
+    within 24 hours.</p>
+
+    <h2>4. Aggregation decides what may be published</h2>
+
+    <p>A scheduled job turns observations into published networks. It applies
+    the publish rules in a fixed order and stops at the first that refuses:</p>
+
+    <pre><code>opt-out (P5) -&gt; mobile check (P4) -&gt; threshold (P1) -&gt; precision (P2/P3) -&gt; write</code></pre>
+
+    <div class="table-scroll">
+      <table>
+        <caption>Publish rules, from <code>privacy/publish-rules.md</code></caption>
+        <thead>
+          <tr><th scope="col">Rule</th><th scope="col">What it does</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">P5</th>
+            <td>A network on the opt-out list is never published. The list holds
+            no addresses in the clear: each one is stored as an HMAC-SHA256
+            under a key only the server has, so a network can be blocked without
+            being kept.</td>
+          </tr>
+          <tr>
+            <th scope="row">P4</th>
+            <td>A network seen more than 1&nbsp;km apart is marked mobile and
+            excluded entirely, not published at a coarser precision. A moving
+            access point is a vehicle, a travel router or a phone, and
+            publishing it would track its owner.</td>
+          </tr>
+          <tr>
+            <th scope="row">P1</th>
+            <td>A community-found network is published only after at least 3
+            observations, from at least 3 distinct rate-limit buckets, on at
+            least 2 distinct UTC days. One person walking past three times is
+            not a confirmation, and a new network therefore takes at least two
+            days to appear.</td>
+          </tr>
+          <tr>
+            <th scope="row">P2</th>
+            <td>A community-found network is published as its name, security
+            type, captive-portal flag, the centre of its geohash-7 cell, the
+            first and last day it was seen, and the report counts.
+            <strong>Never its hardware address.</strong></td>
+          </tr>
+          <tr>
+            <th scope="row">P3</th>
+            <td>An owner-verified network is published at full precision, 5
+            decimal places, with its hardware addresses, the venue name, and the
+            password only if the owner marked it public.</td>
+          </tr>
+          <tr>
+            <th scope="row">P6</th>
+            <td>A network is unpublished when it has not been seen for 12
+            months, when it reaches 3 reports saying it is private or gone, or
+            when its owner withdraws it.</td>
+          </tr>
+          <tr>
+            <th scope="row">P7</th>
+            <td>Raw observations are deleted within 7 days of the aggregation
+            that consumed them. Rate-limit hashes are deleted within 24 hours.
+            A scheduled job does it, not a person remembering to.</td>
+          </tr>
+          <tr>
+            <th scope="row">P8</th>
+            <td>A published network's identifier is random, with no derivation
+            from its hardware address, name or position, and is not reused.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Why a community-found network is a cell, not a pin</h3>
+
+    <p>A network that nobody has claimed is published as the centre of its
+    <a href="https://en.wikipedia.org/wiki/Geohash">geohash</a>-7 cell. At the
+    latitude of Bologna that cell is about 153&nbsp;m tall and 109&nbsp;m wide;
+    the specification quotes it as about 150&nbsp;m, which is the taller side.
+    The hardware address is withheld.</p>
+
+    <p>What a reader learns is that free Wi-Fi exists on roughly this block,
+    which is what a person looking for Wi-Fi needs. What they do not learn is
+    which flat a router sits in. Two consequences follow, and they are worth
+    saying out loud:</p>
+
+    <ul>
+      <li>The dump cannot be used to look up where a specific access point is.
+      Community-found hardware addresses never appear in it, and the API has no
+      lookup by hardware address.</li>
+      <li>The coordinate in a community record is not a measurement. It is a
+      cell centre. Anything built on this data should read
+      <code>precision_m</code> and <code>cell</code> rather than treating the
+      point as a position.</li>
+    </ul>
+
+    <p>An owner-verified network is the opposite case, and deliberately so: the
+    owner asked to be found, so the position is published exactly, to 5 decimal
+    places, carrying a stated precision of 10&nbsp;m, together with the hardware
+    addresses. That is a choice the venue makes, and the claim flow
+    has to say so in those words before the owner confirms. See
+    <a href="venues.html">the page for venues</a>.</p>
+
+    <h2>5. Publication: the API and a weekly dump</h2>
+
+    <p>Published networks are split into area files, one per geohash-5 cell,
+    about 4.9&nbsp;km across. The same document is served two ways, so a client
+    needs one parser:</p>
+
+    <ul>
+      <li><code>GET /v1/areas/{geohash5}</code> from the API.</li>
+      <li><code>areas/&lt;gh2&gt;/&lt;gh3&gt;/&lt;gh5&gt;.geojson</code> in the
+      <a href="https://github.com/WiFiShare/data">data</a> repository on GitHub,
+      committed weekly by a bot, with a monthly snapshot released for anyone who
+      needs a stable version to cite.</li>
+    </ul>
+
+    <p>Asking for an area tells the server only which 4.9&nbsp;km cell the
+    caller cares about, which is coarse enough that the request is not a
+    position report. Clients fetch their own cell plus the eight neighbours, so
+    a network just across a boundary is still found.</p>
+
+    <p>The history of the data repository is squashed once a month, on purpose.
+    A removed network must not stay readable in an old commit forever. If
+    someone renames their network to <code>_nomap</code>, or asks for it to be
+    taken out, the removal has to be real.</p>
+
+    <p><a href="developers.html">The developers page</a> has the worked path
+    example and the licence terms.</p>
+
+    <h2>Reading this for yourself</h2>
+
+    <p>Everything above is a summary. The normative text is in the
+    <a href="https://github.com/WiFiShare/spec">spec</a> repository, and if this
+    page and that repository disagree, that repository is right. The rules also
+    ship as test fixtures: a client that keeps a network the fixtures drop is a
+    privacy bug and must not ship.</p>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <div>
+        <h2>Project</h2>
+        <ul role="list">
+          <li><a href="https://github.com/WiFiShare">GitHub organisation</a></li>
+          <li><a href="https://github.com/WiFiShare/spec">spec</a></li>
+          <li><a href="https://github.com/WiFiShare/data">data</a></li>
+          <li><a href="contribute.html">Contribute</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>This site</h2>
+        <ul role="list">
+          <li><a href="privacy.html">Privacy policy (draft)</a></li>
+          <li><a href="optout.html">Opt a network out</a></li>
+          <li><a href="https://github.com/WiFiShare/wifishare.github.io">Source of this site</a></li>
+        </ul>
+      </div>
+    </div>
+    <p>Site code is MIT. Site text is
+      <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+      The published data is
+      <a href="https://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a>.</p>
+    <p class="status-line">No cookies, no analytics, no third-party embeds.
+      WiFiShare is in early development: no data is collected, no app is
+      released and the API is not live.</p>
+  </div>
+</footer>
+
+</body>
+</html>
